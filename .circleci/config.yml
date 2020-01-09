@@ -1,0 +1,19 @@
+version: 2.1
+executors:
+  default:
+    docker:
+      - image: circleci/golang:1.13
+
+jobs:
+  test:
+    executor:
+      name: default
+    steps:
+      - checkout
+      - run: go test ./...
+
+workflows:
+  version: 2
+  untagged-build:
+    jobs:
+      - test
