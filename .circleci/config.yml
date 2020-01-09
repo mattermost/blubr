@@ -5,15 +5,22 @@ executors:
       - image: circleci/golang:1.13
 
 jobs:
+  check-style:
+    executor:
+      name: default
+    steps:
+      - checkout
+      - run: make check-style
   test:
     executor:
       name: default
     steps:
       - checkout
-      - run: go test ./...
+      - run: make test
 
 workflows:
   version: 2
   untagged-build:
     jobs:
+      - check-style
       - test
