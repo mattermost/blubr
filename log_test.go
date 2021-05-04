@@ -10,11 +10,8 @@ import (
 
 var logrus = log.NewEntry(log.New())
 var defaultLogger = &logrusLogger{
-	l: logrus,
-	infoLogger: infoLogger{
-		l:    logrus,
-		name: "default",
-	},
+	l:    logrus,
+	name: "default",
 }
 
 func TestNewLogger(t *testing.T) {
