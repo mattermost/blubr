@@ -1,22 +1,13 @@
 GO ?= $(shell command -v go 2> /dev/null)
-
-export GO111MODULE=on
+PACKAGES=$(shell go list ./...)
 
 ## Checks the code style and tests
 all: check-style test
 
 ## Runs govet and gofmt against all packages.
 .PHONY: check-style
-check-style: govet lint
+check-style: govet goformat
 	@echo Checking for style guide compliance
-
-## Runs lint against all packages.
-.PHONY: lint
-lint:
-	@echo Running lint
-	env GO111MODULE=off $(GO) get -u golang.org/x/lint/golint
-	golint -set_exit_status ./...
-	@echo lint success
 
 ## Runs govet against all packages.
 .PHONY: vet
@@ -24,6 +15,26 @@ govet:
 	@echo Running govet
 	$(GO) vet ./...
 	@echo Govet success
+
+## Checks if files are formatted with go fmt.
+.PHONY: goformat
+goformat:
+	@echo Running gofmt
+	@for package in $(PACKAGES); do \
+		echo "Checking "$$package; \
+		files=$$(go list -f '{{range .GoFiles}}{{$$.Dir}}/{{.}} {{end}}' $$package); \
+		if [ "$$files" ]; then \
+			gofmt_output=$$(gofmt -d -s $$files 2>&1); \
+			if [ "$$gofmt_output" ]; then \
+				echo "$$gofmt_output"; \
+				echo "gofmt failed"; \
+				echo "To fix it, run:"; \
+				echo "go fmt [FAILED_PACKAGE]"; \
+				exit 1; \
+			fi; \
+		fi; \
+	done
+	@echo "gofmt success"; \
 
 ## Runs go test against all packages.
 .PHONY: test
